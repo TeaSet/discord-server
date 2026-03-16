@@ -4,5 +4,7 @@ module.exports = {
     "1482916621717733538",
     "1482916763879608511"	
   ],
-  studyLogChannel: "1482925356947083315"
+  studyLogChannel: "1482925356947083315",
+
+  studyDashboardChannel: "1482948107519135885"
 }

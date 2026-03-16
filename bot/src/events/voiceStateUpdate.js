@@ -1,5 +1,6 @@
 const { studyVoiceChannels, studyLogChannel } = require("../config")
 const tracker = require("../systems/studyTracker")
+const dashboard = require("../systems/studyDashboard")
 
 module.exports = (client) => {
 
@@ -32,28 +33,37 @@ module.exports = (client) => {
 
       const session = tracker.endSession(userId)
 
-      if (!session || !logChannel) return
+      if (session) {
 
-      if (session.counted) {
+        if (logChannel) {
 
-        logChannel.send(
-          `🎉 <@${userId}> completed a study session! (${session.minutes} minutes)`
-        )
+          if (session.counted) {
 
-      } else {
+            logChannel.send(
+              `🎉 <@${userId}> completed a study session! (${session.minutes} minutes)`
+            )
 
-        const timeText =
-          session.minutes > 0
-            ? `${session.minutes} minutes`
-            : `${session.seconds} seconds`
+          } else {
 
-        logChannel.send(
-          `⏱ <@${userId}> studied for ${timeText} (too short to count as a full session)`
-        )
+            const timeText =
+              session.minutes > 0
+                ? `${session.minutes} minutes`
+                : `${session.seconds} seconds`
+
+            logChannel.send(
+              `⏱ <@${userId}> studied for ${timeText} (too short to count as a full session)`
+            )
+
+          }
+
+        }
 
       }
 
     }
+
+    // update dashboard after any voice change
+    dashboard.updateDashboard(client, guild)
 
   })
 
