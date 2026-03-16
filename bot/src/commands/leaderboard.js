@@ -4,7 +4,7 @@ const db = require("../utils/database")
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("leaderboard")
-    .setDescription("Server study leaderboard"),
+    .setDescription("Show the study leaderboard"),
 
   async execute(interaction) {
 
@@ -12,14 +12,37 @@ module.exports = {
 
     const sorted = Object.entries(data)
       .sort((a, b) => b[1].totalTime - a[1].totalTime)
-      .slice(0, 5)
+      .slice(0, 10)
 
-    let message = "🏆 Study Leaderboard\n\n"
+    if (sorted.length === 0) {
+      return interaction.reply("No study data yet.")
+    }
+
+    const medals = ["🥇", "🥈", "🥉"]
+
+    let message = "🏆 **Study Leaderboard**\n\n"
 
     sorted.forEach((user, index) => {
-      message += `${index + 1}. <@${user[0]}> — ${user[1].totalTime} min\n`
+
+      const userId = user[0]
+      const minutes = user[1].totalTime
+
+      const hours = Math.floor(minutes / 60)
+      const mins = minutes % 60
+
+      const timeText =
+        hours > 0
+          ? `${hours}h ${mins}m`
+          : `${mins}m`
+
+      const position =
+        medals[index] ? medals[index] : `${index + 1}.`
+
+      message += `${position} <@${userId}> — ${timeText}\n`
+
     })
 
-    await interaction.reply(message)
+    interaction.reply(message)
+
   }
 }
