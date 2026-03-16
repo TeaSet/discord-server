@@ -5,6 +5,8 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates]
 })
 
+require("./events/voiceStateUpdate")(client)
+
 client.commands = new Collection()
 
 const fs = require('fs')
