@@ -13,17 +13,27 @@ function endSession(userId) {
 
   if (!user.currentSession) return null
 
-  // calculate session length
   const durationSeconds = Math.floor((Date.now() - user.currentSession) / 1000)
   const durationMinutes = Math.floor(durationSeconds / 60)
 
-  // ignore sessions shorter than 30 seconds
+  // ignore extremely short sessions
   if (durationSeconds < 30) {
     db.updateUser(userId, { currentSession: null })
     return null
   }
 
-  // update database
+  // session must be at least 5 minutes to count
+  if (durationMinutes < 5) {
+    db.updateUser(userId, { currentSession: null })
+
+    return {
+      seconds: durationSeconds,
+      minutes: durationMinutes,
+      counted: false
+    }
+  }
+
+  // counted session
   db.updateUser(userId, {
     totalTime: user.totalTime + durationMinutes,
     sessions: user.sessions + 1,
@@ -32,7 +42,8 @@ function endSession(userId) {
 
   return {
     seconds: durationSeconds,
-    minutes: durationMinutes
+    minutes: durationMinutes,
+    counted: true
   }
 }
 

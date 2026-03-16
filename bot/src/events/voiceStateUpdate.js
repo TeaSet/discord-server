@@ -20,6 +20,7 @@ module.exports = (client) => {
 
     const logChannel = guild.channels.cache.get(studyLogChannel)
 
+    // user joined study channel
     if (joinedStudy && !leftStudy) {
 
       tracker.startSession(userId)
@@ -30,16 +31,31 @@ module.exports = (client) => {
 
     }
 
+    // user left study channel
     if (!joinedStudy && leftStudy) {
 
       const session = tracker.endSession(userId)
 
       if (session && logChannel) {
 
-        if (session.minutes > 0) {
-          logChannel.send(`⏱ <@${userId}> studied for ${session.minutes} minutes`)
+        if (session.counted) {
+
+          logChannel.send(
+            `🎉 <@${userId}> completed a study session! (${session.minutes} minutes)`
+          )
+
         } else {
-          logChannel.send(`⏱ <@${userId}> studied for ${session.seconds} seconds`)
+
+          if (session.minutes > 0) {
+            logChannel.send(
+              `⏱ <@${userId}> studied for ${session.minutes} minutes (too short to count as a full session)`
+            )
+          } else {
+            logChannel.send(
+              `⏱ <@${userId}> studied for ${session.seconds} seconds (too short to count as a full session)`
+            )
+          }
+
         }
 
       }
