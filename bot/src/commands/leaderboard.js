@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js")
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js")
 const db = require("../utils/database")
 
 module.exports = {
@@ -20,7 +20,7 @@ module.exports = {
 
     const medals = ["🥇", "🥈", "🥉"]
 
-    let message = "🏆 **Study Leaderboard**\n\n"
+    let leaderboardText = ""
 
     sorted.forEach((user, index) => {
 
@@ -38,11 +38,15 @@ module.exports = {
       const position =
         medals[index] ? medals[index] : `${index + 1}.`
 
-      message += `${position} <@${userId}> — ${timeText}\n`
-
+      leaderboardText += `${position} <@${userId}> — ${timeText}\n`
     })
 
-    interaction.reply(message)
+    const embed = new EmbedBuilder()
+      .setTitle("🏆 Study Leaderboard")
+      .setDescription(leaderboardText)
+      .setColor(0x00b894)
+
+    await interaction.reply({ embeds: [embed] })
 
   }
 }
