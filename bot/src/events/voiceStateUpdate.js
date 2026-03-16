@@ -8,20 +8,16 @@ module.exports = (client) => {
     const userId = newState.id
     const guild = newState.guild
 
-    const joinedStudy =
-      oldState.channelId !== newState.channelId &&
-      newState.channelId &&
-      studyVoiceChannels.includes(newState.channelId)
+    const oldChannel = oldState.channelId
+    const newChannel = newState.channelId
 
-    const leftStudy =
-      oldState.channelId &&
-      studyVoiceChannels.includes(oldState.channelId) &&
-      oldState.channelId !== newState.channelId
+    const wasStudy = studyVoiceChannels.includes(oldChannel)
+    const isStudy = studyVoiceChannels.includes(newChannel)
 
     const logChannel = guild.channels.cache.get(studyLogChannel)
 
-    // user joined study channel
-    if (joinedStudy && !leftStudy) {
+    // user joined study channel from a non-study channel
+    if (!wasStudy && isStudy) {
 
       tracker.startSession(userId)
 
@@ -31,32 +27,29 @@ module.exports = (client) => {
 
     }
 
-    // user left study channel
-    if (!joinedStudy && leftStudy) {
+    // user left study channel to a non-study channel
+    if (wasStudy && !isStudy) {
 
       const session = tracker.endSession(userId)
 
-      if (session && logChannel) {
+      if (!session || !logChannel) return
 
-        if (session.counted) {
+      if (session.counted) {
 
-          logChannel.send(
-            `🎉 <@${userId}> completed a study session! (${session.minutes} minutes)`
-          )
+        logChannel.send(
+          `🎉 <@${userId}> completed a study session! (${session.minutes} minutes)`
+        )
 
-        } else {
+      } else {
 
-          if (session.minutes > 0) {
-            logChannel.send(
-              `⏱ <@${userId}> studied for ${session.minutes} minutes (too short to count as a full session)`
-            )
-          } else {
-            logChannel.send(
-              `⏱ <@${userId}> studied for ${session.seconds} seconds (too short to count as a full session)`
-            )
-          }
+        const timeText =
+          session.minutes > 0
+            ? `${session.minutes} minutes`
+            : `${session.seconds} seconds`
 
-        }
+        logChannel.send(
+          `⏱ <@${userId}> studied for ${timeText} (too short to count as a full session)`
+        )
 
       }
 
